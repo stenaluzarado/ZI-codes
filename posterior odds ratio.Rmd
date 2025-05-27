@@ -1,0 +1,164 @@
+---
+title: "Posterior Odds Ratio"
+author: "Arado, Stena Luz M."
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This is the code for computing the posterior odds ratio in comparison for the two competing models. 
+
+Since we will compare the best-fitted models with other zero-inflated INGARCHX* models, we will also do it for log-ZIGP INGARCHX* case for Data 2 and 3 even if ZIP INGARCHX* is deemed as the best model for the data examples. We also want to represent the stand-alone best-fitted model among the log-ZIGP INGARCHX* models. 
+
+For log-ZIGP INGARCHX* model (with rainfall only as covariate, and with temperature only as covariate) for data 2 and data 3, since the two models have very close DIC values. This is to test if the difference is still significant and which model is better supported with the data. 
+
+Similarly, during DIC comparison with other zero-inflated INGARCHX* models, the best-fitted model for Data 2 which is still ZIP INGARCHX* model (with rain and temp as exogenous covariate) has a close value to the ZINB INGARCHX* (with temperature as exogenous covariate).
+
+Moreover, since the codes are separate for the log-ZIGP INGARCHX* model with rainfall only as covariate and for the log-ZIGP INGARCHX* model with temperature only as covariate, we run the original codes and save the value of the marginal likelihoods of each model. The same applies for the ZIP INGARCHX* model (with rain and temp as exogenous covariate) and ZINB INGARCHX* (with temperature as exogenous covariate).
+
+
+
+
+# For Data 2: Suarez
+## Model 1 - ZINB INGARCHX* (Temp) vs Model 2 - ZIP INGARCHX* (Rain & Temp)
+
+```{r}
+#Model 1 - ZINB INGARCHX*(Temp) vs Model 2 - ZIP INGARCHX*(Rain & Temp)
+mlog_zinb <- -918.0475
+mlog_zip <- -917.2668
+
+# Bayes Factor (ZINB vs ZIP)
+log_bf_zinb_vs_zip <- mlog_zinb - mlog_zip
+bf_zinb_vs_zip <- exp(log_bf_zinb_vs_zip)
+
+# Posterior odds (equal prior)
+posterior_odds <- bf_zinb_vs_zip
+posterior_prob_zinb <- posterior_odds / (1 + posterior_odds)
+posterior_prob_zip <- 1 - posterior_prob_zinb
+
+# Posterior odds ratio
+posterior_odds_ratio <- posterior_prob_zinb / posterior_prob_zip
+
+# Display results
+cat("Posterior Probability of ZINB INGARCX* (Temp) Model:", round(posterior_prob_zinb, 4), "\n")
+cat("Posterior Probability of ZIP INGARCHX* (Rain & Temp) Model:", round(posterior_prob_zip, 4), "\n")
+cat("Posterior Odds Ratio (ZINB INGARCX* (Temp) vs ZIP INGARCHX* (Rain & Temp)):", round(posterior_odds_ratio, 4), "\n")
+
+# Interpretation
+cat("\n--- Interpretation ---\n")
+if (bf_zinb_vs_zip > 1) {
+  cat("The Posterior Odds Ratio is greater than 1, indicating the ZINB INGARCX* (Temp) model is better supported by the data.\n")
+} else {
+  cat("The Posterior Odds Ratio is less than 1, indicating the ZIP INGARCHX* (Rain & Temp) model is better supported by the data.\n")
+}
+
+# Conditional posterior probability conclusion
+if (posterior_prob_zinb > posterior_prob_zip) {
+  cat(paste0("With posterior probability ", round(posterior_prob_zinb * 100, 2),
+             "%, the ZINB INGARCX* (Temp) model is more likely to be true under equal prior belief.\n"))
+} else {
+  cat(paste0("With posterior probability ", round(posterior_prob_zip * 100, 2),
+             "%, the ZIP INGARCHX* (Rain & Temp) model is more likely to be true under equal prior belief.\n"))
+}
+
+```
+
+
+
+
+# For log-ZIGP INGARCHX* Data 2: Suarez
+## Model 1 - Rain vs Model 2 - Temp
+
+
+```{r}
+# Model1 - Rain (suarez) vs Model2 - Temp (suarez)
+mlog_rain <- -980.1697
+mlog_temp <- -979.6959
+
+# Bayes Factor (Rain vs Temp)
+log_bf_rain_vs_temp <- mlog_rain - mlog_temp
+bf_rain_vs_temp <- exp(log_bf_rain_vs_temp)
+
+# Posterior odds (equal prior)
+posterior_odds <- bf_rain_vs_temp
+posterior_prob_rain <- posterior_odds / (1 + posterior_odds)
+posterior_prob_temp <- 1 - posterior_prob_rain
+
+# Posterior odds ratio
+posterior_odds_ratio <- posterior_prob_rain / posterior_prob_temp
+
+# Display results
+cat("Posterior Probability of Rainfall Model:", round(posterior_prob_rain, 4), "\n")
+cat("Posterior Probability of Temperature Model:", round(posterior_prob_temp, 4), "\n")
+cat("Posterior Odds Ratio (Rainfall vs Temperature):", round(posterior_odds_ratio, 4), "\n")
+
+# Interpretation
+cat("\n--- Interpretation ---\n")
+if (bf_rain_vs_temp > 1) {
+  cat("The Posterior Odds Ratio is greater than 1, indicating the Rainfall model is better supported by the data.\n")
+} else {
+  cat("The Posterior Odds Ratio is less than 1, indicating the Temperature model is better supported by the data.\n")
+}
+
+# Conditional posterior probability conclusion
+if (posterior_prob_rain > posterior_prob_temp) {
+  cat(paste0("With posterior probability ", round(posterior_prob_rain * 100, 2),
+             "%, the Rainfall model is more likely to be true under equal prior belief.\n"))
+} else {
+  cat(paste0("With posterior probability ", round(posterior_prob_temp * 100, 2),
+             "%, the Temperature model is more likely to be true under equal prior belief.\n"))
+}
+
+```
+
+
+
+# For log-ZIGP INGARCHX* Data 3: Buruun
+## Model 1 - Rain vs Model 2 - Temp
+
+
+```{r}
+# Model1 - Rain (buruun) vs Model2 - Temp (buruun)
+mlog_rain <- -886.9842
+mlog_temp <- -886.7668
+
+
+# Bayes Factor (Rain vs Temp)
+log_bf_rain_vs_temp <- mlog_rain - mlog_temp
+bf_rain_vs_temp <- exp(log_bf_rain_vs_temp)
+
+# Posterior odds (equal prior)
+posterior_odds <- bf_rain_vs_temp
+posterior_prob_rain <- posterior_odds / (1 + posterior_odds)
+posterior_prob_temp <- 1 - posterior_prob_rain
+
+# Posterior odds ratio
+posterior_odds_ratio <- posterior_prob_rain / posterior_prob_temp
+
+# Display results
+cat("Posterior Probability of Rainfall Model:", round(posterior_prob_rain, 4), "\n")
+cat("Posterior Probability of Temperature Model:", round(posterior_prob_temp, 4), "\n")
+cat("Posterior Odds Ratio (Rainfall vs Temperature):", round(posterior_odds_ratio, 4), "\n")
+
+# Interpretation
+cat("\n--- Interpretation ---\n")
+if (bf_rain_vs_temp > 1) {
+  cat("The Posterior Odds Ratio is greater than 1, indicating the Rainfall model is better supported by the data.\n")
+} else {
+  cat("The Posterior Odds Ratio is less than 1, indicating the Temperature model is better supported by the data.\n")
+}
+
+# Conditional posterior probability conclusion
+if (posterior_prob_rain > posterior_prob_temp) {
+  cat(paste0("With posterior probability ", round(posterior_prob_rain * 100, 2),
+             "%, the Rainfall model is more likely to be true under equal prior belief.\n"))
+} else {
+  cat(paste0("With posterior probability ", round(posterior_prob_temp * 100, 2),
+             "%, the Temperature model is more likely to be true under equal prior belief.\n"))
+}
+
+```
+

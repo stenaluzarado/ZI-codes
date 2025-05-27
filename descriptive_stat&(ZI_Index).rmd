@@ -1,0 +1,228 @@
+---
+title: "THESIS"
+author: "stina"
+date: "`r Sys.Date()`"
+output: html_document
+---
+```{r, warning=FALSE, message=FALSE}
+library(readxl)
+library(ggplot2)
+library(tidyverse)
+library(knitr)
+library(gridExtra)
+
+# Read the Excel file
+iligan_data <- readxl::read_xlsx(path="C:\\Users\\ACER\\Downloads\\ThesisIT!\\IC\\Iligan_Dengue_Cases.xlsx", sheet=1) 
+```
+
+```{r}
+iligan_data$Week <- as.numeric(gsub("W", "", iligan_data$WEEK_NUM))
+
+iligan_data$Date <- as.Date(paste(iligan_data$YEAR, iligan_data$Week, 1, sep = "-"), format = "%Y-%U-%u")
+```
+
+```{r, warning=FALSE, fig.align = 'center',fig.cap = "Data 1: Weekly Dengue Cases in Iligan City (2010–2024)"}
+ggplot(iligan_data, aes(x = Date, y = ILIGAN)) +
+  geom_line(color = "black", size = 1) +
+  labs(title = "Data 1: Weekly Dengue Cases in Iligan City (2010–2024)",
+       x = "Time",
+       y = "Y_t") +
+  theme_minimal() +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") 
+
+```
+
+
+
+```{r, warning=FALSE, fig.align = 'center',fig.cap = "Data 2: Weekly Dengue Cases in Tubod, Iligan City (2010–2024)"}
+fig2 <-ggplot(iligan_data, aes(x = Date, y = TUBOD)) +
+  geom_line(color = "black", size = 1) +
+  labs(title = "Data 2: Weekly Dengue Cases in Tubod, Iligan City (2010–2024)",
+       x = "Time",
+       y = "Y_t") +
+  theme_minimal() +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") 
+
+```
+
+
+
+```{r, warning=FALSE, fig.align = 'center',fig.cap = "Data 3: Weekly Dengue Cases in Tibanga, Iligan City (2010–2024)"}
+fig3 <-ggplot(iligan_data, aes(x = Date, y = TIBANGA)) +
+  geom_line(color = "black", size = 1) +
+  labs(title = "Data 3: Weekly Dengue Cases in Tibanga, Iligan City (2010–2024)",
+       x = "Time",
+       y = "Y_t") +
+  theme_minimal() +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") + 
+  scale_y_continuous(breaks = seq(0, 25, by=2)) 
+
+grid.arrange(fig2,fig3)
+```
+
+
+
+
+```{r, warning=FALSE, fig.align = 'center',fig.cap = "Data 4: Weekly Dengue Cases in Suarez, Iligan City (2010–2024)"}
+fig4 <-ggplot(iligan_data, aes(x = Date, y = SUAREZ)) +
+  geom_line(color = "black", size = 1) +
+  labs(title = "Data 4: Weekly Dengue Cases in Suarez, Iligan City (2010–2024)",
+       x = "Time",
+       y = "Y_t") +
+  theme_minimal() +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") 
+
+```
+
+
+
+```{r, warning=FALSE, fig.align = 'center',fig.cap ="Data 5: Weekly Dengue Cases in Buruun, Iligan City(2010–2024)"}
+fig5 <- ggplot(iligan_data, aes(x = Date, y = BURUUN)) +
+  geom_line(color = "black", size = 1) +
+  labs(title = "Data 5: Weekly Dengue Cases in Buruun, Iligan City(2010–2024)",
+       x = "Time",
+       y = "Y_t") +
+  theme_minimal() +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") +  
+  scale_y_continuous(breaks = seq(0, 25, by=2))  
+
+grid.arrange(fig4,fig5)
+```
+
+
+```{r, warning=FALSE, }
+ggplot(iligan_data, aes(x = Date, y = rainfall)) +
+  geom_line(color = "black", size = 1) +
+  labs(title = "Weekly cumulative rainfall in Iligan City",
+       x = "Time",
+       y = "Y_t") +
+  theme_minimal() +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") 
+
+```
+
+
+
+```{r, warning=FALSE, }
+ggplot(iligan_data, aes(x = Date, y = temperature)) +
+  geom_line(color = "black", size = 1) +
+  labs(title = "Weekly cumulative rainfall in Iligan City",
+       x = "Time",
+       y = "Y_t") +
+  theme_minimal() +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") 
+
+```
+
+
+```{r}
+# Descriptive Statistics for dengue data
+get_descriptive_stats <- function(df, column_name) {
+  df %>%
+    summarise(
+      mean = mean(get(column_name), na.rm = TRUE),
+      variance = var(get(column_name), na.rm = TRUE),
+      min = min(get(column_name), na.rm = TRUE),
+      Q1 = quantile(get(column_name), 0.25, na.rm = TRUE),
+      median = median(get(column_name), na.rm = TRUE),
+      Q3 = quantile(get(column_name), 0.75, na.rm = TRUE),
+      max = max(get(column_name), na.rm = TRUE),
+      zero_count = sum(get(column_name) == 0, na.rm = TRUE),
+      zero_percentage = sum(get(column_name) == 0, na.rm = TRUE) / length(get(column_name)) * 100  
+    )
+}
+
+# List of column names for each city
+cities <- c("ILIGAN",  "TUBOD", "TIBANGA", "SUAREZ", "BURUUN" )
+
+
+descriptive_stats <- lapply(1:length(cities), function(i) {
+  city <- cities[i]
+  stats <- get_descriptive_stats(iligan_data, city)
+  stats$data <- paste("Data", i)  
+  stats$location <- city
+  return(stats)
+})
+
+# Combining results into a single data frame
+descriptive_stats_df <- do.call(rbind, descriptive_stats)
+descriptive_stats_df <- descriptive_stats_df[, c("data", "location", "mean", "variance", "min", "Q1", "median", "Q3", "max", "zero_percentage")]
+
+# Display the summary table
+print(descriptive_stats_df)
+
+```
+
+```{r}
+# Descriptive Statistics for the meteorological data (rainfall and temperature)
+cov_descriptive_stats <- function(df, column_name) {
+  df %>%
+    summarise(
+      mean = mean(get(column_name), na.rm = TRUE),
+      median = median(get(column_name), na.rm = TRUE),
+      min = min(get(column_name), na.rm = TRUE),
+      max = max(get(column_name), na.rm = TRUE)
+    )
+}
+
+# List of exogenous variables (covariates)
+exogenous <- c("weekly_rainfall", "weekly_temp_max")
+
+# Apply the descriptive statistics function to each exogenous variable
+cov_ds <- lapply(exogenous, function(variable) {
+  cov_stats <- cov_descriptive_stats(iligan_data, variable)
+  cov_stats$exogenous_variable <- ifelse(variable == "weekly_rainfall", "Rainfall (mm)", "Temperature (°C)")  # Add labels
+  return(cov_stats)
+})
+
+# Combine the results into a single data frame
+cov_descriptive_stats_df <- do.call(rbind, cov_ds)
+cov_descriptive_stats_df <- cov_descriptive_stats_df[, c("exogenous_variable", "mean", "median", "min", "max")]
+
+# Display the summary table
+print(cov_descriptive_stats_df)
+
+```
+
+
+
+
+#-------------------------------------------------
+#Note: Run all of the code chunks above before running this
+# Run this sa console for the zero-inflation Index
+
+calculate_zero_inflation <- function(count_data) {
+  # Remove NA
+  count_data <- na.omit(count_data)
+  
+  lambda <- mean(count_data)
+  sigma2 <- var(count_data)
+  p0 <- mean(count_data == 0)
+  
+  # zi_P
+  zi_P <- 1 + log(p0) / lambda
+  
+  
+  return(data.frame(Mean = lambda, Variance = sigma2, p0 = p0, zi_P = zi_P))
+}
+
+# List of barangays
+barangays <- c("ILIGAN", "TUBOD", "TIBANGA", "SUAREZ", "BURUUN")
+
+# Apply function to each column
+zi_results <- lapply(barangays, function(area) {
+  result <- calculate_zero_inflation(iligan_data[[area]])
+  result$Area <- area
+  return(result)
+})
+
+# Combine and format
+zi_results_df <- do.call(rbind, zi_results) %>%
+  select(Area, everything()) %>%
+  mutate(across(where(is.numeric), round, 4))
+
+# Display the table
+kable(zi_results_df, caption = "Zero-Inflation Indices for Weekly Dengue Cases")
+
+
+
